@@ -1,7 +1,18 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import './App.css';
 import {questions} from "./data/questions";
-import {Grid, Paper, Radio, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@material-ui/core";
+import {
+  Grid,
+  Paper,
+  Radio,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
+} from "@material-ui/core";
 import {BarGraph} from "./BarGraph";
 
 type Answer = 'DD' | 'SD' | 'SA' | 'DA'
@@ -40,12 +51,21 @@ function Question({type, id, question, selectedValues, handleChange}: QuestionPr
 
 function App() {
   const [calculatedResult, setCalculatedResult] = useState<any[]>([]);
-  const [selectedValues, setSelectedValues] = useState<SelectedValues>({
+  const params = new URLSearchParams(window.location.search);
+
+  function getOrDefault(data: string | null, def: SelectedValues): SelectedValues {
+    if (data == null) return def;
+    else return JSON.parse(atob(data)) as SelectedValues;
+  }
+
+  const [selectedValues, setSelectedValues] = useState<SelectedValues>(getOrDefault(
+    params.get("data"),
+    {
     "external": ['DD', 'DD', 'DA', 'DA', 'DD', 'DA', 'DD', 'DA', 'DA', 'DD'],
     "internal": ['DD', 'DD', 'DA', 'DA', 'DD', 'DA', 'DD', 'DA', 'DA', 'DD'],
     "deeper": ['DD', 'DD', 'DA', 'DA', 'DD', 'DA', 'DD', 'DA', 'DA', 'DD'],
     "spiritual": ['DD', 'DD', 'DA', 'DA', 'DD', 'DA', 'DD', 'DA', 'DA', 'DD']
-  });
+  }));
   const [externalScore, setExternalScore] = useState(0);
   const [internalScore, setInternalScore] = useState(0);
   const [deeperScore, setDeeperScore] = useState(0);
@@ -54,6 +74,12 @@ function App() {
   function handleChange(type: string, id: number, answer: Answer) {
     selectedValues[type][id - 1] = answer;
     setSelectedValues(selectedValues);
+
+    const code = Buffer.from(JSON.stringify(selectedValues)).toString('base64');
+    const value = encodeURI(code);
+
+    window.history.replaceState("", "", `/self-check-status-psy?data=${value}`);
+
     calcScore();
   }
 
@@ -108,10 +134,14 @@ function App() {
     ])
   }
 
+  useEffect(() => {
+    calcScore();
+  }, [selectedValues]);
+
   return (
     <div className="App">
       <Grid container>
-        <Grid item xs={4}></Grid>
+        <Grid item xs={4} />
         <Grid item xs={4}>
         <TableContainer component={Paper}>
           <Table>
@@ -142,7 +172,7 @@ function App() {
           </Table>
         </TableContainer>
         </Grid>
-        <Grid item xs={4}></Grid>
+        <Grid item xs={4} />
       </Grid>
       <h1>외적인 삶: {externalScore}</h1>
       {questions.external.map(({id, question}) =>
