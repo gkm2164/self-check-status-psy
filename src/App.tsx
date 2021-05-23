@@ -1,8 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import './App.css';
 import {questions} from "./data/questions";
 import {
-  Box,
   Grid,
   Paper,
   Radio,
@@ -63,22 +62,23 @@ function App() {
     calcScore();
   }
 
-  const scoreMap = {
-    'DD': 0,
-    'SD': 1,
-    'SA': 2,
-    'DA': 3,
-  }
+  const calcLineScore = useCallback((answers: Answer[]) => {
+    const inverse = new Set([3, 4, 6, 8, 9]);
 
-  const inverseScoreMap = {
-    'DD': 3,
-    'SD': 2,
-    'SA': 1,
-    'DA': 0,
-  }
-  const inverse = new Set([3, 4, 6, 8, 9]);
+    const scoreMap = {
+      'DD': 0,
+      'SD': 1,
+      'SA': 2,
+      'DA': 3,
+    }
 
-  function calcLineScore(answers: Answer[]) {
+    const inverseScoreMap = {
+      'DD': 3,
+      'SD': 2,
+      'SA': 1,
+      'DA': 0,
+    }
+
     return answers.map((answer, idx) => {
       if (inverse.has(idx + 1)) {
         return inverseScoreMap[answer];
@@ -86,9 +86,9 @@ function App() {
         return scoreMap[answer];
       }
     }).reduce((acc, elem) => acc + elem)
-  }
+  }, []);
 
-  function calcScore() {
+  const calcScore = useCallback(() => {
     setExternalScore(calcLineScore(selectedValues["external"]))
     setInternalScore(calcLineScore(selectedValues["internal"]))
     setDeeperScore(calcLineScore(selectedValues["deeper"]))
@@ -112,11 +112,11 @@ function App() {
         "value": spiritualScore
       }
     ])
-  }
+  }, [calcLineScore, deeperScore, externalScore, internalScore, spiritualScore, selectedValues])
 
   useEffect(() => {
     calcScore();
-  }, [selectedValues]);
+  }, [calcScore]);
 
   return (
     <div className="App">
@@ -155,7 +155,6 @@ function App() {
         <Grid item xs={4}/>
       </Grid>
       <h1>외적인 삶: {externalScore}</h1>
-      <Indicator/>
       {questions.external.map(({id, question}) =>
         <Question type={"external"}
                   id={id}
@@ -163,7 +162,6 @@ function App() {
                   selectedValues={selectedValues}
                   handleChange={handleChange}/>)}
       <h1>내적인 삶: {internalScore}</h1>
-      <Indicator/>
       {questions.internal.map(({id, question}) =>
         <Question type={"internal"}
                   id={id}
@@ -171,7 +169,6 @@ function App() {
                   selectedValues={selectedValues}
                   handleChange={handleChange}/>)}
       <h1>심층적 삶: {deeperScore}</h1>
-      <Indicator/>
       {questions.deeper.map(({id, question}) =>
         <Question type={"deeper"}
                   id={id}
@@ -179,7 +176,6 @@ function App() {
                   selectedValues={selectedValues}
                   handleChange={handleChange}/>)}
       <h1>영적인 삶: {spiritualScore}</h1>
-      <Indicator/>
       {questions.spiritual.map(({id, question}) =>
         <Question type={"spiritual"}
                   id={id}
@@ -195,39 +191,23 @@ function App() {
   );
 }
 
-const Indicator = () => <Grid container>
-  <Grid item xs={6}/>
-  <Grid item xs={1}/>
-  <Grid item xs={1}>DD</Grid>
-  <Grid item xs={1}>SD</Grid>
-  <Grid item xs={1}>SA</Grid>
-  <Grid item xs={1}>DA</Grid>
-  <Grid item xs={1}/>
-</Grid>
-
-
-function Question({type, id, question, selectedValues, handleChange}: QuestionProp) {
-  return (<div>
-      <Grid container>
-        <Grid item xs={6}>
-          <Box alignItems="flex-start">
-            {question}
-          </Box>
-        </Grid>
-        <Grid item xs={6}>
-          <Box alignItems="flex-start">
-            {(['DD', 'SD', 'SA', 'DA'] as Answer[]).map(answer => <>
-              <Radio
-                checked={selectedValues[type][id - 1] === answer}
-                onChange={() => handleChange(type, id, answer)}
-                value={answer}
-                name={`question-button-${type}-${id}`}
-                inputProps={{'aria-label': answer}}/></>)}
-          </Box>
-        </Grid>
-      </Grid>
-    </div>
-  )
-}
+const Question = ({type, id, question, selectedValues, handleChange}: QuestionProp) => (
+  <Paper>
+    <hr />
+    <Grid item xs={12}>
+      {question}
+    </Grid>
+    <Grid item xs={12}>
+      {(['DD', 'SD', 'SA', 'DA'] as Answer[]).map(answer => <>
+        {answer}
+        <Radio
+          checked={selectedValues[type][id - 1] === answer}
+          onChange={() => handleChange(type, id, answer)}
+          value={answer}
+          name={`question-button-${type}-${id}`}
+          inputProps={{'aria-label': answer}}/></>)}
+    </Grid>
+  </Paper>
+);
 
 export default App;
