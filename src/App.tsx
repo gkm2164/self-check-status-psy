@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useState} from 'react';
 import './App.css';
 import {questions} from "./data/questions";
 import {
-  Grid,
+  Grid, makeStyles,
   Paper,
   Radio,
   Table,
@@ -191,23 +191,33 @@ function App() {
   );
 }
 
-const Question = ({type, id, question, selectedValues, handleChange}: QuestionProp) => (
-  <Paper>
-    <hr />
-    <Grid item xs={12}>
-      {question}
-    </Grid>
-    <Grid item xs={12}>
-      {(['DD', 'SD', 'SA', 'DA'] as Answer[]).map(answer => <>
-        {answer}
-        <Radio
-          checked={selectedValues[type][id - 1] === answer}
-          onChange={() => handleChange(type, id, answer)}
-          value={answer}
-          name={`question-button-${type}-${id}`}
-          inputProps={{'aria-label': answer}}/></>)}
-    </Grid>
-  </Paper>
-);
+const useStyles = makeStyles({
+  root: {
+    "margin-left": "20px",
+    "margin-right": "20px"
+  }
+});
+
+const Question = ({type, id, question, selectedValues, handleChange}: QuestionProp) => {
+  const classes = useStyles();
+  return (
+    <Paper className={classes.root}>
+      <hr/>
+      <Grid item xs={12}>
+        {question}
+      </Grid>
+      <Grid item xs={12}>
+        {(['DD', 'SD', 'SA', 'DA'] as Answer[]).map(answer => <>
+          {answer}
+          <Radio
+            checked={selectedValues[type][id - 1] === answer}
+            onChange={() => handleChange(type, id, answer)}
+            value={answer}
+            name={`question-button-${type}-${id}`}
+            inputProps={{'aria-label': answer}}/></>)}
+      </Grid>
+    </Paper>
+  );
+}
 
 export default App;
