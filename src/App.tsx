@@ -57,7 +57,7 @@ function App() {
     const code = Buffer.from(JSON.stringify(selectedValues)).toString('base64');
     const value = encodeURI(code);
 
-    window.history.replaceState("", "", `/self-check-status-psy?data=${value}`);
+    window.history.replaceState("", "", `/?data=${value}`);
 
     calcScore();
   }
