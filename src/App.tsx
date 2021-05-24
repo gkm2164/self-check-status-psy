@@ -121,6 +121,12 @@ function App() {
   return (
     <div className="App">
       <Grid container>
+        <Grid item xs={12}>
+          <h1>설명</h1>
+          <p>이 설문은 "내 그림자에게 말걸기" 라는 책에서 발췌했습니다. 각 문항에는 DD, SD, SA, DA로 답이 구분되어 있습니다. 문항을 읽고 해당하는 항목을 클릭해주시면 됩니다.</p>
+          <p>해당 항목을 클릭하면 본 페이지의 맨 아래의 그래프에 반영되어 수치를 볼 수 있습니다.</p>
+          <p>저장기능은 지원되지 않으나, 답을 클릭하면 현재 페이지의 웹주소에 반영됩니다. 다음에 와서 다시 작성하고자 한다면 브라우저상의 주소를 복사하여 붙여두시면 답안을 기입한 곳 부터 다시 입력할 수 있습니다.</p>
+        </Grid>
         <Grid item xs={4}/>
         <Grid item xs={4}>
           <TableContainer component={Paper}>
